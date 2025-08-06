@@ -106,8 +106,9 @@ async def handle_llm(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 
-    os.environ['GROQ_API_KEY'] = os.environ.get('GROQ_API_KEY')
+    api_key = os.environ.get('GROQ_API_KEY')
     response = completion(
+        api_key = api_key,
         model="groq/meta-llama/llama-4-scout-17b-16e-instruct", 
         messages=[
         {"role": "user", "content": user_message},
@@ -158,4 +159,5 @@ if __name__ == "__main__":
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_llm))
 
     app.run_polling()
+
 

@@ -11,6 +11,7 @@ import os
 import gspread
 import pandas as pd
 
+
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.INFO
@@ -25,7 +26,7 @@ info = json.loads(os.environ["GOOGLE_SERVICE_ACCOUNT_JSON"])
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
 
 # Authenticate using the service account
-credentials = Credentials.from_service_account_info(info)
+credentials = Credentials.from_service_account_info(info,scopes=SCOPES)
 gc = gspread.authorize(credentials)
 client = gspread.authorize(credentials)
 spreadsheet = client.open("participants application | Rewaq")
@@ -157,3 +158,4 @@ if __name__ == "__main__":
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_llm))
 
     app.run_polling()
+

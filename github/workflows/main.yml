@@ -1,0 +1,26 @@
+name: My Python Workflow
+
+on: [push]  # You can also use `workflow_dispatch` for manual trigger
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run Python script with Google Service Account JSON
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          # You can add other secrets as needed, like GROQ_API_KEY
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        run: python app.py

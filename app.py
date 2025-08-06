@@ -148,7 +148,18 @@ https://www.instagram.com/rewaq_workspace/
     print(response)
 
     await update.message.reply_text(response['choices'][0]['message']['content'])
-
+async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE):
+    """Handle errors that occur in the application."""
+    logger.error("Exception while handling an update:", exc_info=context.error)
+    
+    # Send error message to user if possible
+    if isinstance(update, Update) and update.effective_message:
+        try:
+            await update.effective_message.reply_text(
+            "⚠️ An error occurred. Please try again later."
+            )
+        except Exception:
+            pass  
 # Setup the bot
 if __name__ == "__main__":
     app = ApplicationBuilder().token("8175405891:AAH66-cEzHOo25Irys6Oo6wbR65qYkjAek8").build()
@@ -156,8 +167,10 @@ if __name__ == "__main__":
     app.add_handler(CommandHandler("out", checkout_command))
     app.add_handler(CommandHandler("help", help_command))
     app.add_handler(CommandHandler("start", start_command))
+    app.add_error_handler(error_handler)
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_llm))
 
     app.run_polling()
+
 
 

@@ -358,24 +358,7 @@ class RewaqBot:
             self.is_running = False
 
 
-    def start_bot(self):
-        """Start the bot in a background thread"""
-        if self.is_running:
-            logger.warning("Bot is already running")
-            return None
-            
-        def bot_runner():
-            self.run_bot_async()
-
-        # Start bot in daemon thread
-        self.bot_thread = threading.Thread(target=bot_runner, daemon=True, name="TelegramBot")
-        self.bot_thread.start()
-        
-        # Give it a moment to start
-        import time
-        time.sleep(2)
-        
-        return self.bot_thread
+    
 
     def stop_bot(self):
         """Stop the bot"""
@@ -399,44 +382,9 @@ def main():
         page_icon="🤖",
         layout="wide"
     )
-    
-    st.title("🤖 Rewaq Bot Dashboard")
-    st.markdown("---")
-    
-    # Initialize bot in session state
-    if 'bot' not in st.session_state:
-        st.session_state.bot = None
-    
-    if 'bot_thread' not in st.session_state:
-        st.session_state.bot_thread = None
-    
-    # Bot control section
-    col1, col2, col3 = st.columns([1, 1, 2])
-    
-    with col1:
-        if st.button("🚀 Start Bot", type="primary"):
-            if st.session_state.bot is None or not st.session_state.bot.is_running:
-                try:
-                    st.session_state.bot = RewaqBot()
-                    st.session_state.bot_thread = st.session_state.bot.start_bot()
-                    st.success("✅ Bot started successfully!")
-                    st.rerun()
-                except Exception as e:
-                    st.error(f"❌ Error starting bot: {e}")
-                    logger.error(f"Bot startup error: {e}")
-    
-    with col2:
-        if st.button("🛑 Stop Bot", type="secondary"):
-            if st.session_state.bot and st.session_state.bot.is_running:
-                try:
-                    st.session_state.bot.stop_bot()
-                    st.session_state.bot = None
-                    st.session_state.bot_thread = None
-                    st.success("🛑 Bot stopped!")
-                    st.rerun()
-                except Exception as e:
-                    st.error(f"❌ Error stopping bot: {e}")
-    
+    bot = RewaqBot()
+    asyncio.run(bot.run_bot_async())
+
     # Bot status
     with col3:
         if st.session_state.bot and st.session_state.bot.is_running:
@@ -540,6 +488,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 

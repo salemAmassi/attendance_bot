@@ -365,11 +365,21 @@ def main():
         page_icon="🤖",
         layout="wide"
     )
-    bot = RewaqBot()
-    asyncio.run(bot.run_bot_async())
+ 
 
     st.markdown("---")
-    
+    bot = RewaqBot()
+        try:
+            loop = asyncio.get_event_loop()
+        except RuntimeError:  # Handle case where no loop is set
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+
+        # Schedule your bot's main logic as a task
+        if not loop.is_running():
+            loop.run_until_complete(bot.run_bot_async()())
+        else:
+            asyncio.create_task(bot.run_bot_async()())
         
     #     try:
     #         # Show participants count
@@ -457,6 +467,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 

@@ -21,9 +21,6 @@ logger = logging.getLogger(__name__)
 # Dictionary to store user activity: {user_id: {date: {'in': True, 'out': False}}}
 user_log = json.load(open('attendance.json', 'r')) if open('attendance.json', 'r') else {}
 
-config = toml.load(".streamlit/config.toml")
-
-# Get the JSON string
 # json_str = config["json_info"]["GOOGLE_SERVICE_ACCOUNT_JSON "]
 json_str = st.secrets['json_info']['GOOGLE_SERVICE_ACCOUNT_JSON']
 # Parse the JSON string
@@ -182,6 +179,7 @@ if __name__ == "__main__":
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_llm))
 
     app.run_polling()
+
 
 
 

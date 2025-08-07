@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "peerless-aria-466111-h6",
+  "private_key_id": "b8c14ab44514bdabadc4908e830f216526cf6f65",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQC1MkG6R/WK7oYg\nErHp31WYacZ6Xw9KWHRh6iES7TiLKqZWcXBT9NGTxryUnGygpDVVaRyIl9s5Slne\nHtGEAtO3Lyx9BiFXlZeTGst8nnMGpCQ5f1w/F0QXfvTeNcsYBM4E42ZmVAZo6tbD\nVJG8V+2wyVKsk8vtq+h+flcsY7v91ggHV7mzuL7SyBSyx/fVs8yLZOxNjea4wV4u\novzi9j38MtAL9SmdviZhzBfIyGSgjxW9M1Plmz6xOlHrEIEm2RaOzqcoRMcKbtCk\nWQina2DzvfGANASai5dcjsJU7TeLr92BMghAEXGRI/uls4MIS+u8RZecmiFtnnrJ\nRM9OxByFAgMBAAECggEAAgoccUipZonuxTel/FhA3LlRZu6LpoOTs8fF3YesBkJR\novwd4+QH495DIHfDmpSelmUw0VzG4UCJUxW3uAEBebi0iye217HdsJCG+n0cwFYN\nTlRfqRoi8GdubCiLg6wHgZ3po3yN9z+wG9ISMzODf7o/DaWQOw70oU/cvVQrY90F\noU/9zK9XWJOLWD8nF74aWiUWjVRy11F1kM8rxrbZQr29dUf4U9kfzoi5e4NUtRrP\nS3MNDLa9Fq8qlJFN+Rfo7UbkIJmjEkFf/2CPaQC+ZY/aOiXSHMJqMKXr6P5Nqeny\nWedZFSKvT0yKWz3jAdyuwTKICnbrdGeO3Py3BruI4QKBgQD7dtvhd877kYSzLSV2\nYerPZOPc7RmaULIptuN4R9pdkQb/v9mU5BBBJomhJjkhBStpVsi18YiBJU2jJMSp\nYerdLqOx+UrP0ajngQUczocM3Fhf0NsnPwcmHqDsVLQmM83zQQDUu2zrsFywndLg\nXcy9rvOQ0LTtS0+dHOQwS0ao2QKBgQC4du8jidUpMpwijITGFj9pkoMhvZOWo2or\nd5uvcoUJ29fgXpVphikZSlhSOqDFXVIuzBhPmpw8pd00l9Uy5xjJkFqX4/taKmO5\n6S20ePCRS7aeS0RqK478nVOObKgfuliCxN2vXAEHNsfgGi+slgNrZ3ObVMIuPMtc\nRP16iOfljQKBgQCzdaD4aNuDt9dfVAHfWYQNHLBts5xI//wWPxpZddYGXoEDNjSe\nyKA9Dra8Fh5BTYIsvC2jg0tq92dP3eaoB2RpE2bplcLpS3RiOzad11qUOBCt2Mz+\nVkHQ15z67HxgoyoAx0xDhbr2/Tc5KHkdfHOoj1nt6LSmgM/BjaPgP2ifCQKBgQCB\nN+d7WLF245oWZaMY9DrFpLmxaBC8RIs6GdZ4h9uENXm7FebKfg3KRpcqOyGmQCIy\n4Avjr6XkojgcAIR73QEzKakcn7rSxcEIWb0HoHS9A3HQ3170lMDcWwVOTvVTDIG2\nUVwN3IBn4ksPxKhC2O9aTKTiWfSQ2UuHvlhmfwMbfQKBgQDJDjNNrq+ke2AwVbQm\nwY7NjB0IKPikphgB4bAB4x0FYXnMC3yZPMHMWwc3IkyH33Fg1oMlakPza5iMq6eE\nGLbYhfAEdyDDn4sh7IcEXeuyn/58T6bXO2u4/NBB50DRvdArydhwYARTzEo0QSLY\ndxUVE8V7/JBIc1PKxDwORZxEXA==\n-----END PRIVATE KEY-----\n",
+  "client_email": "rewaq-910@peerless-aria-466111-h6.iam.gserviceaccount.com",
+  "client_id": "118172328610088127946",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/rewaq-910%40peerless-aria-466111-h6.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

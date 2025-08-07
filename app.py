@@ -10,6 +10,7 @@ import logging
 import os
 import gspread
 import pandas as pd
+import toml
 
 
 logging.basicConfig(
@@ -20,7 +21,13 @@ logger = logging.getLogger(__name__)
 # Dictionary to store user activity: {user_id: {date: {'in': True, 'out': False}}}
 user_log = json.load(open('attendance.json', 'r')) if open('attendance.json', 'r') else {}
 
-info = json.loads(os.environ["GOOGLE_SERVICE_ACCOUNT_JSON"])
+config = toml.load(".streamlit/config.toml")
+
+# Get the JSON string
+json_str = config["json_info"]["GOOGLE_SERVICE_ACCOUNT_JSON "]
+
+# Parse the JSON string
+info = json.loads(json_str)
 
 # Define the scope (for Google Sheets and Drive)
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
@@ -106,7 +113,12 @@ async def handle_llm(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 
-    api_key = os.environ.get('GROQ_API_KEY')
+    api_key = config["GROQ_API_KEY"]
+
+
+
+# Parse the JSON string
+data = json.loads(json_str)
     response = completion(
         api_key = api_key,
         model="groq/meta-llama/llama-4-scout-17b-16e-instruct", 
@@ -171,6 +183,7 @@ if __name__ == "__main__":
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_llm))
 
     app.run_polling()
+
 
 
 

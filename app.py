@@ -337,8 +337,7 @@ class RewaqBot:
         self.app.add_handler(
             MessageHandler(filters.TEXT & ~filters.COMMAND, self.handle_llm)
         )
-
-  async def run_bot_async(self):
+    async def run_bot_async(self):
         """Run bot asynchronously"""
         try:
             bot_token = st.secrets.get("BOT_TOKEN", "your-fallback-bot-token")
@@ -541,4 +540,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 

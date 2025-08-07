@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 # Dictionary to store user activity: {user_id: {date: {'in': True, 'out': False}}}
 
 
-SERVICE_ACCOUNT_FILE = 'peerless-aria-466111-h6-b8c14ab44514.json'
+info = json.loads(st.secrets['json_info']['GOOGLE_SERVICE_ACCOUNT_JSON'])
 
 # Define the scope (for Google Sheets and Drive)
 SCOPES = [
@@ -29,8 +29,7 @@ SCOPES = [
 ]
 
 # Authenticate using the service account
-credentials = Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE,
-                                                    scopes=SCOPES)
+credentials = Credentials.from_info(info, scopes=SCOPES)
 gc = gspread.authorize(credentials)
 client = gspread.authorize(credentials)
 spreadsheet = client.open("participants application | Rewaq")
@@ -267,3 +266,4 @@ if __name__ == "__main__":
                                    handle_llm))
 
     app.run_polling()
+

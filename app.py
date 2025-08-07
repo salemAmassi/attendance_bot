@@ -385,69 +385,55 @@ def main():
     bot = RewaqBot()
     asyncio.run(bot.run_bot_async())
 
-    # Bot status
-    with col3:
-        if st.session_state.bot and st.session_state.bot.is_running:
-            st.success("🟢 Bot is running and listening for messages")
-        else:
-            st.error("🔴 Bot is not running")
-    
-    # Refresh button for status
-    if st.button("🔄 Refresh Status"):
-        st.rerun()
-    
     st.markdown("---")
     
-    # Statistics and monitoring section
-    if st.session_state.bot:
-        st.subheader("📊 Bot Statistics")
         
-        try:
-            # Show participants count
-            participants_count = len(st.session_state.bot.participants)
-            st.metric("Total Participants", participants_count)
+    #     try:
+    #         # Show participants count
+    #         participants_count = len(st.session_state.bot.participants)
+    #         st.metric("Total Participants", participants_count)
             
-            # Show recent attendance (today)
-            today = st.session_state.bot.today_str()
-            attendance_worksheet = st.session_state.bot.attendance_log.get_worksheet(2)
-            attendance_records = attendance_worksheet.get_all_records()
+    #         # Show recent attendance (today)
+    #         today = st.session_state.bot.today_str()
+    #         attendance_worksheet = st.session_state.bot.attendance_log.get_worksheet(2)
+    #         attendance_records = attendance_worksheet.get_all_records()
             
-            today_checkins = [
-                record for record in attendance_records 
-                if record.get('day') == today
-            ]
+    #         today_checkins = [
+    #             record for record in attendance_records 
+    #             if record.get('day') == today
+    #         ]
             
-            col1, col2 = st.columns(2)
-            with col1:
-                st.metric("Today's Check-ins", len(today_checkins))
+    #         col1, col2 = st.columns(2)
+    #         with col1:
+    #             st.metric("Today's Check-ins", len(today_checkins))
             
-            with col2:
-                checked_out = len([
-                    record for record in today_checkins 
-                    if record.get('out_time')
-                ])
-                st.metric("Today's Check-outs", checked_out)
+    #         with col2:
+    #             checked_out = len([
+    #                 record for record in today_checkins 
+    #                 if record.get('out_time')
+    #             ])
+    #             st.metric("Today's Check-outs", checked_out)
             
-            # Show recent activity
-            if today_checkins:
-                st.subheader("📋 Today's Activity")
+    #         # Show recent activity
+    #         if today_checkins:
+    #             st.subheader("📋 Today's Activity")
                 
-                activity_df = pd.DataFrame(today_checkins)
-                if not activity_df.empty:
-                    # Get user names
-                    activity_df['اسم المستخدم'] = activity_df['user_id'].apply(
-                        lambda x: st.session_state.bot.get_user_name(str(x))
-                    )
+    #             activity_df = pd.DataFrame(today_checkins)
+    #             if not activity_df.empty:
+    #                 # Get user names
+    #                 activity_df['اسم المستخدم'] = activity_df['user_id'].apply(
+    #                     lambda x: st.session_state.bot.get_user_name(str(x))
+    #                 )
                     
-                    st.dataframe(
-                        activity_df[['user_id', 'اسم المستخدم', 'in_time', 'out_time']],
-                        use_container_width=True
-                    )
+    #                 st.dataframe(
+    #                     activity_df[['user_id', 'اسم المستخدم', 'in_time', 'out_time']],
+    #                     use_container_width=True
+    #                 )
         
-        except Exception as e:
-            st.error(f"Error loading statistics: {e}")
+    #     except Exception as e:
+    #         st.error(f"Error loading statistics: {e}")
     
-    # Bot information
+    # # Bot information
     st.markdown("---")
     st.subheader("ℹ️ Bot Information")
     
@@ -488,6 +474,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 

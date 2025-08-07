@@ -338,30 +338,26 @@ class RewaqBot:
             MessageHandler(filters.TEXT & ~filters.COMMAND, self.handle_llm)
         )
 
-    def run_bot_sync(self):
-        """Run bot synchronously - works better with threading"""
+  async def run_bot_async(self):
+        """Run bot asynchronously"""
         try:
-            # Build application
-            bot_token = st.secrets.get("BOT_TOKEN", "8175405891:AAH66-cEzHOo25Irys6Oo6wbR65qYkjAek8")
+            bot_token = st.secrets.get("BOT_TOKEN", "your-fallback-bot-token")
             self.app = ApplicationBuilder().token(bot_token).build()
-            
-            # Setup handlers
             self.setup_handlers()
-            
-            # Run polling - this creates its own event loop internally
-            logger.info("Starting bot polling...")
+
+            logger.info("Starting bot polling (async)...")
             self.is_running = True
-            
-            # Use run_polling with proper signal handling disabled
-            self.app.run_polling(
+
+            await self.app.run_polling(
                 drop_pending_updates=True,
-                close_loop=False,  # Don't close the loop automatically
-                stop_signals=None  # Disable signal handling that causes the error
+                close_loop=False,  # avoid closing event loop
+                stop_signals=None  # disable signal handling
             )
-            
+
         except Exception as e:
-            logger.error(f"Error running bot: {e}")
+            logger.error(f"Error running async bot: {e}")
             self.is_running = False
+
 
     def start_bot(self):
         """Start the bot in a background thread"""
@@ -545,3 +541,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

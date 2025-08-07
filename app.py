@@ -349,31 +349,14 @@ class RewaqBot:
 
             await self.app.run_polling(
                 drop_pending_updates=True,
-                close_loop=False,  # avoid closing event loop
-                stop_signals=None  # disable signal handling
+                close_loop=False,
+                stop_signals=None
             )
-
         except Exception as e:
             logger.error(f"Error running async bot: {e}")
             self.is_running = False
-
-
     
 
-    def stop_bot(self):
-        """Stop the bot"""
-        if not self.is_running:
-            logger.warning("Bot is not running")
-            return
-            
-        try:
-            self.is_running = False
-            if self.app and hasattr(self.app, 'updater'):
-                # Stop the updater
-                self.app.stop_running()
-                logger.info("Bot stopped successfully")
-        except Exception as e:
-            logger.error(f"Error stopping bot: {e}")
 
 # Streamlit Interface
 def main():
@@ -474,6 +457,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 

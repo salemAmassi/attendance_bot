@@ -339,22 +339,11 @@ class RewaqBot:
         )
     async def run_bot_async(self):
         """Run bot asynchronously"""
-        try:
-            # bot_token = st.secrets.get("BOT_TOKEN", "your-fallback-bot-token")
-            self.app = ApplicationBuilder().token("8175405891:AAH66-cEzHOo25Irys6Oo6wbR65qYkjAek8").build()
-            self.setup_handlers()
-
-            logger.info("Starting bot polling (async)...")
-            self.is_running = True
-
-            await self.app.run_polling(
-                drop_pending_updates=True,
-                close_loop=False,
-                stop_signals=None
-            )
-        except Exception as e:
-            logger.error(f"Error running async bot: {e}")
-            self.is_running = False
+        self.app = ApplicationBuilder().token("8175405891:AAH66-cEzHOo25Irys6Oo6wbR65qYkjAek8").build()
+        self.setup_handlers()
+        logger.info("Starting bot polling (async)...")
+        await self.app.run_polling()
+        
     
 
 
@@ -457,6 +446,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 

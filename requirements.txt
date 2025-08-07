@@ -4,4 +4,5 @@ gspread
 google-auth
 litellm
 toml
+streamlit
 

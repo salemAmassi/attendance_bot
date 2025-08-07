@@ -1,14 +1,12 @@
 import streamlit as st
-import asyncio
-import threading
 import logging
 import datetime
 import pandas as pd
+import json
 from datetime import datetime as dt
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 
-from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes, filters
+from telegram import Update, Bot
 from telegram.constants import ParseMode
 from litellm import completion
 from google.oauth2.service_account import Credentials
@@ -22,12 +20,12 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-class RewaqBot:
+class RewaqBotWebhook:
     def __init__(self):
-        self.app = None
-        self.is_running = False
+        self.bot = None
         self.setup_credentials()
         self.setup_sheets()
+        self.setup_bot()
     
     def setup_credentials(self):
         """Setup Google Sheets credentials"""
@@ -78,6 +76,15 @@ class RewaqBot:
             logger.error(f"Error setting up sheets: {e}")
             raise
     
+    def setup_bot(self):
+        """Setup bot instance"""
+        try:
+            bot_token = st.secrets.get("BOT_TOKEN", "8175405891:AAH66-cEzHOo25Irys6Oo6wbR65qYkjAek8")
+            self.bot = Bot(token=bot_token)
+        except Exception as e:
+            logger.error(f"Error setting up bot: {e}")
+            raise
+    
     def has_checkin(self, sheet_records: list, user_id: str, today: str) -> bool:
         """Check if user has already checked in today"""
         return any(
@@ -98,118 +105,76 @@ class RewaqBot:
         except (IndexError, KeyError):
             return "مستخدم غير معروف"
     
-    async def checkin_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        """Handle check-in command"""
+    def process_checkin(self, user_id: str) -> str:
+        """Process check-in command"""
         try:
             attendance_worksheet = self.attendance_log.get_worksheet(2)
             attendance_sheet = attendance_worksheet.get_all_records()
             
-            message = update.message.text.strip()
-            parts = message.split()
-
-            if len(parts) != 2 or parts[0] != "/in" or parts[1] == "":
-                await update.message.reply_text(
-                    "❌ استخدم هذا الشكل: \n`/in 1234`",
-                    parse_mode=ParseMode.MARKDOWN
-                )
-                return
-
-            user_id = parts[1]
             timestamp = dt.now().strftime("%Y-%m-%d %H:%M:%S")
             today = self.today_str()
 
             if user_id not in self.participants['user_id'].values:
-                await update.message.reply_text("❌ هذا المستخدم غير مسجل في رِواق.")
-                return
+                return "❌ هذا المستخدم غير مسجل في رِواق."
 
             first_name = self.get_user_name(user_id)
 
             if not self.has_checkin(attendance_sheet, user_id, today):
                 attendance_worksheet.append_row([user_id, timestamp, '', today])
-                await update.message.reply_text(
-                    f"✅ مرحباً {first_name}، نرجو لكِ يوماً سعيداً ومليئاً بالإنجازات 💙",
-                    parse_mode=ParseMode.MARKDOWN
-                )
                 logger.info(f"User {user_id} checked in at {timestamp}")
+                return f"✅ مرحباً {first_name}، نرجو لكِ يوماً سعيداً ومليئاً بالإنجازات 💙"
             else:
-                await update.message.reply_text("⚠️ لقد قمتِ بتسجيل الدخول بالفعل اليوم.")
+                return "⚠️ لقد قمتِ بتسجيل الدخول بالفعل اليوم."
                 
         except Exception as e:
-            logger.error(f"Error in checkin_command: {e}")
-            await update.message.reply_text("❌ حدث خطأ أثناء تسجيل الدخول. يرجى المحاولة مرة أخرى.")
+            logger.error(f"Error in process_checkin: {e}")
+            return "❌ حدث خطأ أثناء تسجيل الدخول. يرجى المحاولة مرة أخرى."
 
-    async def checkout_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        """Handle checkout command"""
+    def process_checkout(self, user_id: str) -> str:
+        """Process checkout command"""
         try:
             attendance_worksheet = self.attendance_log.get_worksheet(2)
             attendance_sheet = attendance_worksheet.get_all_records()
             
-            message = update.message.text.strip()
-            parts = message.split()
-            
-            if len(parts) != 2 or parts[0] != "/out" or parts[1] == "":
-                await update.message.reply_text(
-                    "❌ استخدمي الطريقة الصحيحة رجاءً: /out <user_id>",
-                    parse_mode=ParseMode.MARKDOWN
-                )
-                return
-
-            user_id = parts[1]
             timestamp = dt.now().strftime("%Y-%m-%d %H:%M:%S")
             today = self.today_str()
 
             if user_id not in self.participants['user_id'].values:
-                await update.message.reply_text("❌ هذا المستخدم غير مسجل في رِواق.")
-                return
+                return "❌ هذا المستخدم غير مسجل في رِواق."
 
             first_name = self.get_user_name(user_id)
 
             if not self.has_checkin(attendance_sheet, user_id, today):
-                await update.message.reply_text(
-                    f"⚠️ لم تقومي بتسجيل الدخول اليوم، {first_name}. يرجى تسجيل الدخول أولاً باستخدام /in <user_id>."
-                )
-                return
+                return f"⚠️ لم تقومي بتسجيل الدخول اليوم، {first_name}. يرجى تسجيل الدخول أولاً."
 
             # Find and update the checkout time
-            updated = False
             for idx, row in enumerate(attendance_sheet, start=2):
                 if str(row['user_id']) == str(user_id) and row['day'] == today:
                     if not row.get('out_time'):  # Only update if not already checked out
                         attendance_worksheet.update_cell(idx, 3, timestamp)
-                        await update.message.reply_text(
-                            f"✅ تم تسجيل خروجكِ بنجاح، {first_name}. نأمل أن يكون يومكِ مليئاً بالإنجازات. 💙",
-                            parse_mode=ParseMode.MARKDOWN
-                        )
                         logger.info(f"User {user_id} checked out at {timestamp}")
-                        updated = True
-                        break
+                        return f"✅ تم تسجيل خروجكِ بنجاح، {first_name}. نأمل أن يكون يومكِ مليئاً بالإنجازات. 💙"
                     else:
-                        await update.message.reply_text(
-                            f"⚠️ لقد قمتِ بتسجيل الخروج بالفعل اليوم، {first_name}."
-                        )
-                        updated = True
-                        break
+                        return f"⚠️ لقد قمتِ بتسجيل الخروج بالفعل اليوم، {first_name}."
             
-            if not updated:
-                await update.message.reply_text("❌ حدث خطأ أثناء تسجيل الخروج.")
+            return "❌ حدث خطأ أثناء تسجيل الخروج."
                 
         except Exception as e:
-            logger.error(f"Error in checkout_command: {e}")
-            await update.message.reply_text("❌ حدث خطأ أثناء تسجيل الخروج. يرجى المحاولة مرة أخرى.")
+            logger.error(f"Error in process_checkout: {e}")
+            return "❌ حدث خطأ أثناء تسجيل الخروج. يرجى المحاولة مرة أخرى."
 
-    async def help_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        """Handle help command"""
-        help_text = (
+    def get_help_text(self) -> str:
+        """Get help text"""
+        return (
             "مرحباً بكِ في دليل بوت رِواق: \n"
             "/in <user_id> - تسجيل الدخول.\n"
             "/out <user_id> - تسجيل الخروج.\n"
             "/help - عرض دليل بوت رِواق."
         )
-        await update.message.reply_text(help_text, parse_mode=ParseMode.MARKDOWN)
 
-    async def start_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        """Handle start command"""
-        welcome_text = """أهلاً وسهلاً بكِ في **رِواق**
+    def get_start_text(self) -> str:
+        """Get start/welcome text"""
+        return """أهلاً وسهلاً بكِ في **رِواق**
 
 **رِواق** هو مساحة آمنة مخصصة للفتيات في **قطاع غزة المتأثرات بالحرب**.  
 يوفر خدمات مثل:
@@ -269,17 +234,13 @@ class RewaqBot:
  
 **م. سالم العمصي** على تيليجرام: `@salemimad`
 """
-        await update.message.reply_text(welcome_text, parse_mode=ParseMode.MARKDOWN)
 
-    async def handle_llm(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        """Handle LLM responses for general messages"""
+    def process_llm_response(self, user_message: str) -> str:
+        """Process LLM response for general messages"""
         try:
-            user_message = update.message.text
-            
             # Check for attendance-related keywords
             if any(word in user_message.lower() for word in ["out", "in", "دخول", "خروج"]):
-                await update.message.reply_text("❌ يرجى استخدام الأوامر /in و /out فقط.")
-                return
+                return "❌ يرجى استخدام الأوامر /in و /out فقط."
 
             # Set up environment for LLM
             os.environ['GROQ_API_KEY'] = st.secrets['GROQ_API_KEY']
@@ -311,66 +272,61 @@ class RewaqBot:
                 ]
             )
 
-            await update.message.reply_text(
-                response['choices'][0]['message']['content']
-            )
+            return response['choices'][0]['message']['content']
             
         except Exception as e:
-            logger.error(f"Error in handle_llm: {e}")
-            await update.message.reply_text(
-                "❌ عذراً، حدث خطأ أثناء معالجة رسالتك. يرجى المحاولة مرة أخرى أو التواصل مع الإدارة."
-            )
+            logger.error(f"Error in process_llm_response: {e}")
+            return "❌ عذراً، حدث خطأ أثناء معالجة رسالتك. يرجى المحاولة مرة أخرى أو التواصل مع الإدارة."
 
-    def setup_handlers(self):
-        """Setup bot command handlers"""
-        if not self.app:
-            return
+    def process_message(self, message_text: str, chat_id: int) -> str:
+        """Process incoming message and return response"""
+        message_text = message_text.strip()
+        
+        # Handle commands
+        if message_text.startswith('/start'):
+            return self.get_start_text()
+        
+        elif message_text.startswith('/help'):
+            return self.get_help_text()
+        
+        elif message_text.startswith('/in'):
+            parts = message_text.split()
+            if len(parts) != 2 or parts[1] == "":
+                return "❌ استخدم هذا الشكل: \n`/in 1234`"
+            return self.process_checkin(parts[1])
+        
+        elif message_text.startswith('/out'):
+            parts = message_text.split()
+            if len(parts) != 2 or parts[1] == "":
+                return "❌ استخدمي الطريقة الصحيحة رجاءً: /out <user_id>"
+            return self.process_checkout(parts[1])
+        
+        else:
+            # Handle general messages with LLM
+            return self.process_llm_response(message_text)
+
+    def send_message(self, chat_id: int, text: str, parse_mode: str = ParseMode.MARKDOWN) -> bool:
+        """Send message to chat"""
+        try:
+            import asyncio
             
-        self.app.add_handler(CommandHandler("in", self.checkin_command))
-        self.app.add_handler(CommandHandler("out", self.checkout_command))
-        self.app.add_handler(CommandHandler("help", self.help_command))
-        self.app.add_handler(CommandHandler("start", self.start_command))
-        self.app.add_handler(
-            MessageHandler(filters.TEXT & ~filters.COMMAND, self.handle_llm)
-        )
-
-    def run_bot(self):
-        """Run the bot in a separate thread with its own event loop"""
-        def bot_runner():
-            # Create new event loop for this thread
+            async def _send():
+                await self.bot.send_message(
+                    chat_id=chat_id, 
+                    text=text, 
+                    parse_mode=parse_mode
+                )
+            
+            # Run in new event loop to avoid conflicts
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
+            loop.run_until_complete(_send())
+            loop.close()
             
-            try:
-                # Build application
-                bot_token = st.secrets.get("BOT_TOKEN", "8175405891:AAH66-cEzHOo25Irys6Oo6wbR65qYkjAek8")
-                self.app = ApplicationBuilder().token(bot_token).build()
-                
-                # Setup handlers
-                self.setup_handlers()
-                
-                # Start polling
-                logger.info("Starting bot polling...")
-                self.is_running = True
-                self.app.run_polling(drop_pending_updates=True)
-                
-            except Exception as e:
-                logger.error(f"Error running bot: {e}")
-                self.is_running = False
-            finally:
-                loop.close()
-
-        # Start bot in daemon thread
-        bot_thread = threading.Thread(target=bot_runner, daemon=True)
-        bot_thread.start()
-        
-        return bot_thread
-
-    def stop_bot(self):
-        """Stop the bot"""
-        if self.app:
-            self.app.stop_running()
-            self.is_running = False
+            return True
+        except Exception as e:
+            logger.error(f"Error sending message: {e}")
+            return False
 
 # Streamlit Interface
 def main():
@@ -384,94 +340,99 @@ def main():
     st.markdown("---")
     
     # Initialize bot in session state
-    if 'bot' not in st.session_state:
-        st.session_state.bot = None
+    if 'webhook_bot' not in st.session_state:
+        try:
+            st.session_state.webhook_bot = RewaqBotWebhook()
+            st.success("✅ Bot initialized successfully!")
+        except Exception as e:
+            st.error(f"❌ Error initializing bot: {e}")
+            return
     
-    if 'bot_thread' not in st.session_state:
-        st.session_state.bot_thread = None
+    # Manual message testing section
+    st.subheader("🧪 Test Bot Manually")
     
-    # Bot control section
-    col1, col2, col3 = st.columns([1, 1, 2])
+    col1, col2 = st.columns([3, 1])
     
     with col1:
-        if st.button("🚀 Start Bot", type="primary"):
-            if st.session_state.bot is None:
-                try:
-                    st.session_state.bot = RewaqBot()
-                    st.session_state.bot_thread = st.session_state.bot.run_bot()
-                    st.success("✅ Bot started successfully!")
-                    st.rerun()
-                except Exception as e:
-                    st.error(f"❌ Error starting bot: {e}")
+        test_message = st.text_input(
+            "Enter a message to test:",
+            placeholder="/start, /help, /in RA-001, /out RA-001, or any question"
+        )
     
     with col2:
-        if st.button("🛑 Stop Bot", type="secondary"):
-            if st.session_state.bot:
-                st.session_state.bot.stop_bot()
-                st.session_state.bot = None
-                st.session_state.bot_thread = None
-                st.success("🛑 Bot stopped!")
-                st.rerun()
+        chat_id = st.number_input("Chat ID", value=123456789, step=1)
     
-    # Bot status
-    with col3:
-        if st.session_state.bot and st.session_state.bot.is_running:
-            st.success("🟢 Bot is running")
-        else:
-            st.error("🔴 Bot is not running")
+    if st.button("📤 Test Message") and test_message:
+        try:
+            response = st.session_state.webhook_bot.process_message(test_message, chat_id)
+            
+            st.markdown("**Bot Response:**")
+            st.markdown(f"```\n{response}\n```")
+            
+            # Optional: Actually send the message
+            if st.checkbox("Send to Telegram"):
+                success = st.session_state.webhook_bot.send_message(chat_id, response)
+                if success:
+                    st.success("✅ Message sent to Telegram!")
+                else:
+                    st.error("❌ Failed to send message to Telegram")
+                    
+        except Exception as e:
+            st.error(f"❌ Error processing message: {e}")
     
     st.markdown("---")
     
-    # Statistics and monitoring section
-    if st.session_state.bot:
-        st.subheader("📊 Bot Statistics")
-        
-        try:
-            # Show participants count
-            participants_count = len(st.session_state.bot.participants)
-            st.metric("Total Participants", participants_count)
-            
-            # Show recent attendance (today)
-            today = st.session_state.bot.today_str()
-            attendance_worksheet = st.session_state.bot.attendance_log.get_worksheet(2)
-            attendance_records = attendance_worksheet.get_all_records()
-            
-            today_checkins = [
-                record for record in attendance_records 
-                if record.get('day') == today
-            ]
-            
-            col1, col2 = st.columns(2)
-            with col1:
-                st.metric("Today's Check-ins", len(today_checkins))
-            
-            with col2:
-                checked_out = len([
-                    record for record in today_checkins 
-                    if record.get('out_time')
-                ])
-                st.metric("Today's Check-outs", checked_out)
-            
-            # Show recent activity
-            if today_checkins:
-                st.subheader("📋 Today's Activity")
-                
-                activity_df = pd.DataFrame(today_checkins)
-                if not activity_df.empty:
-                    # Get user names
-                    activity_df['اسم المستخدم'] = activity_df['user_id'].apply(
-                        lambda x: st.session_state.bot.get_user_name(str(x))
-                    )
-                    
-                    st.dataframe(
-                        activity_df[['user_id', 'اسم المستخدم', 'in_time', 'out_time']],
-                        use_container_width=True
-                    )
-        
-        except Exception as e:
-            st.error(f"Error loading statistics: {e}")
+    # Statistics section
+    st.subheader("📊 Statistics")
     
-    # Bot information
+    try:
+        bot = st.session_state.webhook_bot
+        
+        # Show participants count
+        participants_count = len(bot.participants)
+        st.metric("Total Participants", participants_count)
+        
+        # Show recent attendance (today)
+        today = bot.today_str()
+        attendance_worksheet = bot.attendance_log.get_worksheet(2)
+        attendance_records = attendance_worksheet.get_all_records()
+        
+        today_checkins = [
+            record for record in attendance_records 
+            if record.get('day') == today
+        ]
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            st.metric("Today's Check-ins", len(today_checkins))
+        
+        with col2:
+            checked_out = len([
+                record for record in today_checkins 
+                if record.get('out_time')
+            ])
+            st.metric("Today's Check-outs", checked_out)
+        
+        # Show recent activity
+        if today_checkins:
+            st.subheader("📋 Today's Activity")
+            
+            activity_df = pd.DataFrame(today_checkins)
+            if not activity_df.empty:
+                # Get user names
+                activity_df['اسم المستخدم'] = activity_df['user_id'].apply(
+                    lambda x: bot.get_user_name(str(x))
+                )
+                
+                st.dataframe(
+                    activity_df[['user_id', 'اسم المستخدم', 'in_time', 'out_time']],
+                    use_container_width=True
+                )
+    
+    except Exception as e:
+        st.error(f"Error loading statistics: {e}")
+    
+    # Instructions section
     st.markdown("---")
     st.subheader("ℹ️ Bot Information")
     
@@ -487,6 +448,10 @@ def main():
     - 🤖 AI-powered responses using LLaMA
     - 🔒 User validation against registered participants
     - 📊 Real-time statistics and monitoring
+    - 🧪 Manual message testing interface
+    
+    **Note:** This version uses webhook-style processing instead of polling to avoid threading issues with Streamlit.
+    For production, you would set up actual webhooks to receive messages from Telegram.
     """)
 
 if __name__ == "__main__":

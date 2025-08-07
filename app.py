@@ -42,7 +42,7 @@ SCOPES = [
 ]
 
 # Authenticate using the service account
-credentials = Credentials.from_info(service_account_info, scopes=SCOPES)
+credentials = Credentials.from_service_account_info(service_account_info, scopes=SCOPES)
 gc = gspread.authorize(credentials)
 client = gspread.authorize(credentials)
 spreadsheet = client.open("participants application | Rewaq")
@@ -279,6 +279,7 @@ if __name__ == "__main__":
                                    handle_llm))
 
     app.run_polling()
+
 
 
 

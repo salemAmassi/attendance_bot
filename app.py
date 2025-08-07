@@ -21,7 +21,19 @@ logger = logging.getLogger(__name__)
 # Dictionary to store user activity: {user_id: {date: {'in': True, 'out': False}}}
 
 
-info = json.loads(st.secrets['GOOGLE_SERVICE_ACCOUNT_JSON'])
+service_account_info = {
+    "type": st.secrets["type"],
+    "project_id": st.secrets["project_id"],
+    "private_key_id": st.secrets["private_key_id"],
+    "private_key": st.secrets["private_key"],
+    "client_email": st.secrets["client_email"],
+    "client_id": st.secrets["client_id"],
+    "auth_uri": st.secrets["auth_uri"],
+    "token_uri": st.secrets["token_uri"],
+    "auth_provider_x509_cert_url": st.secrets["auth_provider_x509_cert_url"],
+    "client_x509_cert_url": st.secrets["client_x509_cert_url"],
+    "universe_domain": st.secrets["universe_domain"]
+}
 
 # Define the scope (for Google Sheets and Drive)
 SCOPES = [
@@ -30,7 +42,7 @@ SCOPES = [
 ]
 
 # Authenticate using the service account
-credentials = Credentials.from_info(info, scopes=SCOPES)
+credentials = Credentials.from_info(service_account_info, scopes=SCOPES)
 gc = gspread.authorize(credentials)
 client = gspread.authorize(credentials)
 spreadsheet = client.open("participants application | Rewaq")
@@ -267,6 +279,7 @@ if __name__ == "__main__":
                                    handle_llm))
 
     app.run_polling()
+
 
 
 

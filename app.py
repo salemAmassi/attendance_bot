@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 # Dictionary to store user activity: {user_id: {date: {'in': True, 'out': False}}}
 
 
-info = json.loads(st.secrets['json_info']['GOOGLE_SERVICE_ACCOUNT_JSON'])
+info = json.loads(st.secrets['GOOGLE_SERVICE_ACCOUNT_JSON'])
 
 # Define the scope (for Google Sheets and Drive)
 SCOPES = [
@@ -207,7 +207,7 @@ async def handle_llm(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("❌ يرجى استخدام الأوامر /in و /out فقط.")
         return
     os.environ[
-        'GROQ_API_KEY'] = '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'
+        'GROQ_API_KEY'] = st.secrets['GROQ_API_KEY']
     response = completion(
         model="groq/meta-llama/llama-4-scout-17b-16e-instruct",
         messages=[{
@@ -267,5 +267,6 @@ if __name__ == "__main__":
                                    handle_llm))
 
     app.run_polling()
+
 
 

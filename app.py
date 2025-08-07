@@ -117,8 +117,7 @@ async def handle_llm(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 
-# Parse the JSON string
-data = json.loads(json_str)
+
     response = completion(
         api_key = api_key,
         model="groq/meta-llama/llama-4-scout-17b-16e-instruct", 
@@ -183,6 +182,7 @@ if __name__ == "__main__":
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_llm))
 
     app.run_polling()
+
 
 
 

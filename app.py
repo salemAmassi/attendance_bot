@@ -23,16 +23,15 @@ user_log = json.load(open('attendance.json', 'r')) if open('attendance.json', 'r
 
 # json_str = config["json_info"]["GOOGLE_SERVICE_ACCOUNT_JSON "]
 json_str = st.secrets['json_info']['GOOGLE_SERVICE_ACCOUNT_JSON']
-st.write("json_str:", json_str)
 
 # Parse the JSON string
-info = json.loads(json_str)
+# info = json.loads(json_str)
 
 # Define the scope (for Google Sheets and Drive)
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
 
 # Authenticate using the service account
-credentials = Credentials.from_service_account_info(info,scopes=SCOPES)
+credentials = Credentials.from_service_account_info(json_str,scopes=SCOPES)
 gc = gspread.authorize(credentials)
 client = gspread.authorize(credentials)
 spreadsheet = client.open("participants application | Rewaq")
@@ -181,6 +180,7 @@ if __name__ == "__main__":
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_llm))
 
     app.run_polling()
+
 
 
 

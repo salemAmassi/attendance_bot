@@ -365,7 +365,7 @@ class RewaqBot:
             return None
             
         def bot_runner():
-            self.run_bot_sync()
+            self.run_bot_async()
 
         # Start bot in daemon thread
         self.bot_thread = threading.Thread(target=bot_runner, daemon=True, name="TelegramBot")
@@ -540,5 +540,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 

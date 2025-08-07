@@ -340,8 +340,8 @@ class RewaqBot:
     async def run_bot_async(self):
         """Run bot asynchronously"""
         try:
-            bot_token = st.secrets.get("BOT_TOKEN", "your-fallback-bot-token")
-            self.app = ApplicationBuilder().token(bot_token).build()
+            # bot_token = st.secrets.get("BOT_TOKEN", "your-fallback-bot-token")
+            self.app = ApplicationBuilder().token("8175405891:AAH66-cEzHOo25Irys6Oo6wbR65qYkjAek8").build()
             self.setup_handlers()
 
             logger.info("Starting bot polling (async)...")
@@ -369,16 +369,7 @@ def main():
 
     st.markdown("---")
     bot = RewaqBot()
-    try:
-        loop = asyncio.get_event_loop()
-    except RuntimeError:  # Handle case where no loop is set
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-    # Schedule your bot's main logic as a task
-    if not loop.is_running():
-        loop.run_until_complete(bot.run_bot_async())
-    else:
-        asyncio.create_task(bot.run_bot_async())
+    asyncio.run(bot.run_bot_async())
         
     #     try:
     #         # Show participants count
@@ -466,6 +457,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 

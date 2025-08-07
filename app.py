@@ -10,7 +10,7 @@ import logging
 import os
 import gspread
 import pandas as pd
-import toml
+import streamlit as st
 
 
 logging.basicConfig(
@@ -24,8 +24,8 @@ user_log = json.load(open('attendance.json', 'r')) if open('attendance.json', 'r
 config = toml.load(".streamlit/config.toml")
 
 # Get the JSON string
-json_str = config["json_info"]["GOOGLE_SERVICE_ACCOUNT_JSON "]
-
+# json_str = config["json_info"]["GOOGLE_SERVICE_ACCOUNT_JSON "]
+json_str = st.secrets['json_info']['GOOGLE_SERVICE_ACCOUNT_JSON']
 # Parse the JSON string
 info = json.loads(json_str)
 
@@ -113,7 +113,7 @@ async def handle_llm(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 
-    api_key = config["GROQ_API_KEY"]
+    api_key = st.secrets['json_info']['GOOGLE_SERVICE_ACCOUNT_JSON']
 
 
 
@@ -182,6 +182,7 @@ if __name__ == "__main__":
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_llm))
 
     app.run_polling()
+
 
 
 

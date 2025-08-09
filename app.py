@@ -4,6 +4,7 @@ from datetime import datetime as dt
 from litellm import completion
 from google.oauth2.service_account import Credentials
 from telegram.constants import ParseMode
+from datetime import timedelta
 
 
 import datetime
@@ -65,7 +66,7 @@ async def checkin_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     action = parts[0]
     user_id = parts[1]
-    timestamp = dt.now().strftime("%Y-%m-%d %H:%M:%S")
+    timestamp = dt.now().strftime("%Y-%m-%d %H:%M:%S") +timedelta(hours=3)
     date = timestamp[:10]
     today = today_str()
     if user_id not in participants['user_id'].values:
@@ -103,7 +104,7 @@ async def checkout_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     action = parts[0]
     user_id = parts[1]
-    timestamp = dt.now().strftime("%Y-%m-%d %H:%M:%S")
+    timestamp = dt.now().strftime("%Y-%m-%d %H:%M:%S") +timedelta(hours=3)
     date = timestamp[:10]
     today = today_str()
     first_name = participants.loc[participants['user_id'] == user_id,
@@ -268,3 +269,4 @@ if __name__ == "__main__":
                                    handle_llm))
 
     app.run_polling()
+

@@ -66,7 +66,7 @@ async def checkin_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     action = parts[0]
     user_id = parts[1]
-    timestamp = dt.now().strftime("%Y-%m-%d %H:%M:%S") +timedelta(hours=3)
+    timestamp = (dt.now() +timedelta(hours=3)).strftime("%Y-%m-%d %H:%M:%S")
     date = timestamp[:10]
     today = today_str()
     if user_id not in participants['user_id'].values:
@@ -104,7 +104,7 @@ async def checkout_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     action = parts[0]
     user_id = parts[1]
-    timestamp = dt.now().strftime("%Y-%m-%d %H:%M:%S") +timedelta(hours=3)
+    timestamp = (dt.now() +timedelta(hours=3)).strftime("%Y-%m-%d %H:%M:%S")
     date = timestamp[:10]
     today = today_str()
     first_name = participants.loc[participants['user_id'] == user_id,
@@ -269,4 +269,5 @@ if __name__ == "__main__":
                                    handle_llm))
 
     app.run_polling()
+
 

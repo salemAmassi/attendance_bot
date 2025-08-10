@@ -118,16 +118,16 @@ async def checkout_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("❌ هذا المستخدم غير مسجل في رِواق.")
         return
         
-    for idx, row in enumerate(attendance_sheet, start=2):  
-        if str(row['user_id']) == str(user_id) and row['day'] == today: 
-            # Update the out_time in column D (index 4)
-            attendance_worksheet.update_cell(idx, 3, timestamp) 
-            await update.message.reply_text(
-                f"✅ تم تسجيل خروجكِ بنجاح، {first_name}. نأمل أن يكون يومكِ مليئاً بالإنجازات. 💙",
-                parse_mode='Markdown')
+    if has_checkin(attendance_sheet,user_id,today) : 
+        # Update the out_time in column D (index 4)
+        attendance_worksheet.update_cell(idx, 3, timestamp) 
+        await update.message.reply_text(
+            f"✅ تم تسجيل خروجكِ بنجاح، {first_name}. نأمل أن يكون يومكِ مليئاً بالإنجازات. 💙",
+            parse_mode='Markdown')
         else:
             await update.message.reply_text(
                 f"⚠️ لقد قمتِ بتسجيل الخروج بالفعل اليوم، {first_name}.")
+                
 
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -269,5 +269,6 @@ if __name__ == "__main__":
                                    handle_llm))
 
     app.run_polling()
+
 
 

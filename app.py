@@ -118,14 +118,18 @@ async def checkout_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("❌ هذا المستخدم غير مسجل في رِواق.")
         return
         
-    if has_checkin(attendance_sheet,user_id,today) : 
+    if has_checkin(attendance_sheet,user_id,today):
+        # Find the row index for the user_id and today
+        idx = next((i + 2 for i, row in enumerate(attendance_sheet)
+                          if str(row['user_id']) == str(user_id) and row['day'] == today),
+                         None) 
         # Update the out_time in column D (index 4)
         attendance_worksheet.update_cell(idx, 3, timestamp) 
         await update.message.reply_text(
             f"✅ تم تسجيل خروجكِ بنجاح، {first_name}. نأمل أن يكون يومكِ مليئاً بالإنجازات. 💙",
             parse_mode='Markdown')
-        else:
-            await update.message.reply_text(
+    else:
+        await update.message.reply_text(
                 f"⚠️ لقد قمتِ بتسجيل الخروج بالفعل اليوم، {first_name}.")
                 
 

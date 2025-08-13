@@ -5,15 +5,14 @@ from litellm import completion
 from google.oauth2.service_account import Credentials
 from telegram.constants import ParseMode
 from datetime import timedelta
-
-
 import datetime
 import json
 import logging
 import os
 import gspread
 import pandas as pd
-
+from dotenv import load_dotenv
+load_dotenv()
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.INFO)
@@ -213,7 +212,7 @@ async def handle_llm(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("❌ يرجى استخدام الأوامر /in و /out فقط.")
         return
     os.environ[
-        'GROQ_API_KEY'] = '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'
+        'GROQ_API_KEY'] = os.getenv('GROQ_API_KEY')
     response = completion(
         model="groq/meta-llama/llama-4-scout-17b-16e-instruct",
         messages=[{
@@ -264,7 +263,7 @@ https://www.instagram.com/rewaq_workspace/
 # Setup the bot
 if __name__ == "__main__":
     app = ApplicationBuilder().token(
-        "8175405891:AAHCKJEE69H1WRFEj7BPyF6ux5cHNYiU1FI").build()
+        os.getenv('BOT_TOKEN')).build()
     app.add_handler(CommandHandler("in", checkin_command))
     app.add_handler(CommandHandler("out", checkout_command))
     app.add_handler(CommandHandler("help", help_command))
@@ -273,6 +272,7 @@ if __name__ == "__main__":
                                    handle_llm))
 
     app.run_polling()
+
 
 
 

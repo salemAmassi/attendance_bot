@@ -197,6 +197,8 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 - **صفحة إنستجرام:**  
   [instagram.com/rewaq_workspace](https://www.instagram.com/rewaq_workspace/)
+- **قناة الإعلانات والتحديثات:**
+  [telegram_channel](https://t.me/rewaq_channel)
 
 - ❓ **لأي استفسارات أُخرى**:  
  
@@ -250,6 +252,8 @@ https://forms.gle/Yuh6dZqv4HQxTb14A
  rewaq.workspace@gmail.com
 صفحة انستجرام: 
 https://www.instagram.com/rewaq_workspace/
+قناة الإعلانات والتحديثات:
+https://t.me/rewaq_channel
 لأي استفسارات لا تعرف إجابتها بالنسبة لرِواق يرجى توجيه المستخدم للتواصل مع منسق رِواق: م. سالم العمصي على تيليجرام :@salemimad
 
 """
@@ -272,6 +276,7 @@ if __name__ == "__main__":
                                    handle_llm))
 
     app.run_polling()
+
 
 
 

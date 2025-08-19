@@ -215,10 +215,8 @@ async def handle_llm(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if "out" in user_message or "in" in user_message:
         await update.message.reply_text("❌ يرجى استخدام الأوامر /in و /out فقط.")
         return
-    # os.environ[
-    #     'GROQ_API_KEY'] = os.getenv('GROQ_API_KEY')
     os.environ[
-        'GROQ_API_KEY'] = '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'
+        'GROQ_API_KEY'] = os.getenv('GROQ_API_KEY')
     response = completion(
         model="groq/meta-llama/llama-4-scout-17b-16e-instruct",
         messages=[{
@@ -290,10 +288,9 @@ async def achieve_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # Setup the bot
 if __name__ == "__main__":
-    # app = ApplicationBuilder().token(
-    #     os.getenv('BOT_TOKEN')).build()
     app = ApplicationBuilder().token(
-        '8152604985:AAH25rehVUZ4-dqPsi1TwNN4siYB8sB1W2g').build()
+        os.getenv('BOT_TOKEN')).build()
+   
     app.add_handler(CommandHandler("in", checkin_command))
     app.add_handler(CommandHandler("out", checkout_command))
     app.add_handler(CommandHandler("help", help_command))

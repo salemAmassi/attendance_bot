@@ -41,6 +41,7 @@ participants = pd.DataFrame(participants_sheet[1:],
                             columns=participants_sheet[0])[[
                                 'user_id', 'الاسم رباعي'
                             ]]
+achivements_sheet = spreadsheet.get_worksheet(1).get_all_records()
 
 def has_checkin(sheet, user_id, today):
     for row in sheet:
@@ -137,7 +138,8 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     help_text = ("مرحباً بكِ في دليل بوت رِواق: \n"
                  "/in <user_id> -تسجيل الدخول .\n"
                  "/out <user_id> - تسجيل الخروج.\n"
-                 "/help - عرض دليل بوت رِواق.")
+                 "/help - عرض دليل بوت رِواق.\n"
+                 "/achieve, <user_id>, <achievement> - تسجيل إنجاز.\n")
     await update.message.reply_text(help_text, parse_mode='Markdown')
 
 
@@ -213,8 +215,10 @@ async def handle_llm(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if "out" in user_message or "in" in user_message:
         await update.message.reply_text("❌ يرجى استخدام الأوامر /in و /out فقط.")
         return
+    # os.environ[
+    #     'GROQ_API_KEY'] = os.getenv('GROQ_API_KEY')
     os.environ[
-        'GROQ_API_KEY'] = os.getenv('GROQ_API_KEY')
+        'GROQ_API_KEY'] = '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'
     response = completion(
         model="groq/meta-llama/llama-4-scout-17b-16e-instruct",
         messages=[{
@@ -262,18 +266,41 @@ https://t.me/rewaq_channel
 
     await update.message.reply_text(
         response['choices'][0]['message']['content'])
-
+async def achieve_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_message = update.message.text
+    parts = user_message.split(",")
+    if len(parts) != 2 or not parts[1].strip().isdigit():
+        await update.message.reply_text(
+            "❌ استخدمي هذا الشكل: \n`/achieve, RA-1234 , YOUR ACHIEVEMENT`",
+            parse_mode='Markdown')
+        return
+    user_id = parts[1].strip()
+    achievement = parts[2].strip()
+    if user_id not in participants['user_id'].values:
+        await update.message.reply_text("❌ هذا المستخدم غير مسجل في رِواق.")
+        return
+    full_name = participants.loc[participants['user_id'] == user_id,
+                                  'الاسم رباعي'].values[0]
+    achivements_sheet.add_row([user_id, achievement, full_name, dt.now().strftime("%Y-%m-%d")])
+    await update.message.reply_text(
+        f"✅ تم تسجيل إنجازكِ بنجاح، {full_name}. شكرًا لمشاركتكِ في رِواق!",
+        parse_mode='Markdown')
+    
+    
 
 # Setup the bot
 if __name__ == "__main__":
+    # app = ApplicationBuilder().token(
+    #     os.getenv('BOT_TOKEN')).build()
     app = ApplicationBuilder().token(
-        os.getenv('BOT_TOKEN')).build()
+        '8152604985:AAH25rehVUZ4-dqPsi1TwNN4siYB8sB1W2g').build()
     app.add_handler(CommandHandler("in", checkin_command))
     app.add_handler(CommandHandler("out", checkout_command))
     app.add_handler(CommandHandler("help", help_command))
     app.add_handler(CommandHandler("start", start_command))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND,
                                    handle_llm))
+    app.add_handler(CommandHandler("achieve", achieve_command))
 
     app.run_polling()
 

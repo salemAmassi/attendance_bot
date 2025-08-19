@@ -267,7 +267,7 @@ https://t.me/rewaq_channel
 async def achieve_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_message = update.message.text
     parts = user_message.split(",")
-    if len(parts) != 2 :
+    if len(parts) != 3 :
         await update.message.reply_text(
             "❌ استخدمي هذا الشكل: \n`/achieve, RA-1234 , YOUR ACHIEVEMENT`",
             parse_mode='Markdown')

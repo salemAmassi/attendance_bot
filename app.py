@@ -279,7 +279,7 @@ async def achieve_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     full_name = participants.loc[participants['user_id'] == user_id,
                                   'الاسم رباعي'].values[0]
-    achivements_sheet.add_row([user_id, achievement, full_name, dt.now().strftime("%Y-%m-%d")])
+    achivements_sheet.append_row([user_id, achievement, full_name, dt.now().strftime("%Y-%m-%d")])
     await update.message.reply_text(
         f"✅ تم تسجيل إنجازكِ بنجاح، {full_name}. شكرًا لمشاركتكِ في رِواق!",
         parse_mode='Markdown')

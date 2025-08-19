@@ -41,7 +41,7 @@ participants = pd.DataFrame(participants_sheet[1:],
                             columns=participants_sheet[0])[[
                                 'user_id', 'الاسم رباعي'
                             ]]
-achivements_sheet = spreadsheet.get_worksheet(1).get_all_records()
+achivements_sheet = spreadsheet.get_worksheet(1)
 
 def has_checkin(sheet, user_id, today):
     for row in sheet:

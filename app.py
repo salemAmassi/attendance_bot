@@ -566,7 +566,7 @@ class RewaqBot:
             app.add_handler(CommandHandler("help", self.help_command))
             app.add_handler(CommandHandler("in", self.checkin_command))
             app.add_handler(CommandHandler("out", self.checkout_command))
-            app.add_handler(CommandHandler("achieve", self.achieve_command))
+            app.add_handler(CommandHandler("done", self.achieve_command))
             app.add_handler(CommandHandler("register", self.register_command))
             
             # Add message handler for LLM

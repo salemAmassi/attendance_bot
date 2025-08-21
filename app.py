@@ -141,9 +141,9 @@ class AttendanceManager:
         )
     def has_checkout(self, attendance_sheet: List[Dict], user_id: str, timestamp: datetime) -> bool:
         """Check if user has already checked in today"""
-      
+        today = self.get_today_str()
         return any(
-            str(row.get('user_id')) == str(user_id) and row.get('out') is not None
+            str(row.get('user_id')) == str(user_id) and datetime.strptime(row['out'], "%Y-%m-%d %H:%M:%S").strftime("%Y-%m-%d") == today
             for row in attendance_sheet
         )
     

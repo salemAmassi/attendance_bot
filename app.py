@@ -2,6 +2,7 @@ import os
 import json
 import logging
 import datetime
+from datetime import datetime as dt
 from datetime import timedelta
 from typing import Optional, Dict, Any, List
 from dataclasses import dataclass
@@ -143,7 +144,8 @@ class AttendanceManager:
         """Check if user has already checked in today"""
         today = self.get_today_str()
         return any(
-            str(row.get('user_id')) == str(user_id) and datetime.strptime(row['out'], "%Y-%m-%d %H:%M:%S").strftime("%Y-%m-%d") == today
+            str(row.get('user_id')) == str(user_id) and row['out'] is not None and row['day'] == today
+            and row['out'] != '' and row['out'] != 'None'
             for row in attendance_sheet
         )
     

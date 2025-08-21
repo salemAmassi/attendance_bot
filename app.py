@@ -35,7 +35,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class Config:
     """Configuration class for the bot"""
-    SERVICE_ACCOUNT_FILE = 'peerless-aria-466111-h6-b8c14ab44514.json'
+    SERVICE_ACCOUNT_FILE = 'peerless-aria-466111-h6-4e3335ac9779.json'
     SCOPES = [
         'https://www.googleapis.com/auth/spreadsheets',
         'https://www.googleapis.com/auth/drive'
@@ -141,8 +141,9 @@ class AttendanceManager:
         )
     def has_checkout(self, attendance_sheet: List[Dict], user_id: str, timestamp: datetime) -> bool:
         """Check if user has already checked in today"""
+      
         return any(
-            str(row.get('user_id')) == str(user_id) and row.get('out') == timestamp
+            str(row.get('user_id')) == str(user_id) and row.get('out') is not None
             for row in attendance_sheet
         )
     
@@ -194,8 +195,8 @@ class AttendanceManager:
             timestamp = self.get_timestamp_with_timezone(self.config.TIMEZONE_OFFSET)
             user_name = self.get_user_name(user_id)
             
-            if not self.has_checkout(attendance_sheet, user_id, timestamp):
-                return False, f"⚠️ لقد قمتِ بتسجيل الخروج بالفعل اليوم، {user_name}."
+            if  self.has_checkout(attendance_sheet, user_id, timestamp):
+                return False, f"⚠️ {user_name}  لقد قمتِ بتسجيل الخروج بالفعل اليوم، ."
             
             # Find the row index for the user_id and today
             row_index = next(

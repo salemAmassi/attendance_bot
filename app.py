@@ -226,6 +226,7 @@ class UserManager:
     
     def get_user_by_chat_id(self, chat_id: str) -> Optional[str]:
         """Get user_id by telegram chat_id"""
+        print("Chat ID:", chat_id)  # Debugging line
         try:
             _, values = self.sheets_manager.get_telegram_chat_ids_sheet()
             user = next((row for row in values if row[0] == chat_id), None)
@@ -379,6 +380,7 @@ class RewaqBot:
 - [رابط Linktree](https://linktr.ee/rewaq_cwlrcp)
 - [رابط تسجيل العضوية](https://forms.gle/viQwbn1GabLm1sLo6)
 - [رابط لتقديم الشكاوى](https://forms.gle/Yuh6dZqv4HQxTb14A)
+- [دليل استخدام البوت](https://docs.google.com/document/d/17c9l5Xm81wxjAwQkp1TzXMXsG0ZzQ4BQ/edit?usp=sharing&ouid=104687676306372448654&rtpof=true&sd=true)
 - **اسم المستخدم للبوت:** `@rewaq_hub_bot`
 
 ---
@@ -391,15 +393,17 @@ class RewaqBot:
 
 - السبت، الاثنين، الأربعاء: 9:00 صباحاً - 1:30 مساءً  
 - السبت، الاثنين، الأربعاء: 1:30 مساءً - 6:00 مساءً
+- الأحد، الثلاثاء، الخميس: 9:00 صباحاً - 1:30 مساءً  
+- الأحد، الثلاثاء، الخميس: 1:30 مساءً - 6:00 مساءً
 
 ---
 
 **تسجيل الحضور اليومي (الدخول والخروج)**
 
-- لتسجيل **الدخول**: `/in RA-0000`
-- لتسجيل **الخروج**: `/out RA-0000`
+- لتسجيل **الدخول**: `/in`
+- لتسجيل **الخروج**: `/out`
 
-مع استبدال `RA-0000` برقم عضويتكِ.
+لمزيد من المعلومات قومي بزيارة قناة التيليجرام وتصفح دليل استخدام البوت
 
 📧 **تواصل**
 
@@ -414,8 +418,8 @@ class RewaqBot:
         """Handle /help command"""
         help_text = (
             "مرحباً بكِ في دليل بوت رِواق:\n\n"
-            "/in <user_id> - تسجيل الدخول\n"
-            "/out <user_id> - تسجيل الخروج\n"
+            "/in  - تسجيل الدخول\n"
+            "/out - تسجيل الخروج\n"
             "/help - عرض دليل بوت رِواق\n"
             "/achieve, <user_id>, <achievement> - تسجيل إنجاز\n"
             "/register <user_id> - تسجيل معرف الدردشة الخاص بك\n\n"
@@ -462,27 +466,31 @@ class RewaqBot:
         """Handle /out command"""
         try:
             message = update.message.text.strip()
-            
-            if not message.startswith("/out"):
-                await update.message.reply_text("❌ استخدم هذا الشكل: `/out`", parse_mode=ParseMode.MARKDOWN)
-                return
-            
-            chat_id = str(update.effective_chat.id)
-            user_id = self.user_manager.get_user_by_chat_id(chat_id)
-            
-            if not user_id:
-                await update.message.reply_text(
-                    "❌ لم تقومي بتسجيل معرف الدردشة الخاص بك. يرجى استخدام الأمر /register <user_id> لتسجيل معرف الدردشة."
-                )
-                return
-            
+            parts = message.split(" ")
+            if len(parts) == 2:
+            # Admin checkin format: /in user_id
+                user_id = parts[1].strip()
+            else:    
+                if not message.startswith("/out"):
+                    await update.message.reply_text("❌ استخدم هذا الشكل: `/out`", parse_mode=ParseMode.MARKDOWN)
+                    return
+                
+                chat_id = str(update.effective_chat.id)
+                user_id = self.user_manager.get_user_by_chat_id(chat_id)
+                
+                if not user_id:
+                    await update.message.reply_text(
+                        "❌ لم تقومي بتسجيل معرف الدردشة الخاص بك. يرجى استخدام الأمر /register <user_id> لتسجيل معرف الدردشة."
+                    )
+                    return
+                
             if not self.attendance_manager.is_valid_user(user_id):
                 await update.message.reply_text("❌ هذا المستخدم غير مسجل في رِواق.")
                 return
-            
+                
             success, message_text = self.attendance_manager.record_checkout(user_id)
             await update.message.reply_text(message_text, parse_mode=ParseMode.MARKDOWN)
-            
+                
         except Exception as e:
             logger.error(f"Error in checkout command: {e}")
             await update.message.reply_text("حدث خطأ أثناء تسجيل الخروج. يرجى المحاولة مرة أخرى.")
@@ -495,7 +503,7 @@ class RewaqBot:
             
             if len(parts) != 2:
                 await update.message.reply_text(
-                    "❌ استخدمي هذا الشكل: `/achieve-YOUR ACHIEVEMENT`",
+                    "❌ استخدمي هذا الشكل: `/يخىث-YOUR ACHIEVEMENT`",
                     parse_mode=ParseMode.MARKDOWN
                 )
                 return

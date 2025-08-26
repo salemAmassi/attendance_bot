@@ -36,13 +36,13 @@ logger = logging.getLogger(__name__)
 class Config:
     """Configuration class for the bot"""
 
-    SERVICE_ACCOUNT_FILE = "peerless-aria-466111-h6-b8c14ab44514.json"
+    SERVICE_ACCOUNT_FILE = "peerless-aria-466111-h6-4e3335ac9779.json"
     SCOPES = [
         "https://www.googleapis.com/auth/spreadsheets",
         "https://www.googleapis.com/auth/drive",
     ]
     TELEGRAM_TOKEN = os.getenv("BOT_TOKEN")
-    TIMEZONE_OFFSET = 3  # hours
+    TIMEZONE_OFFSET = 0  # hours
 
     # Spreadsheet names
     PARTICIPANTS_SPREADSHEET = "participants application | Rewaq"
@@ -231,13 +231,15 @@ class AttendanceManager:
             )
             print("Row index for checkout:", row_index)  # Debugging line
             if row_index:
+                if attendance_sheet[row_index - 2]["out"]:
+                    return False, f"⚠️ {user_name}  لقد قمتِ بتسجيل الخروج بالفعل اليوم، ."
                 attendance_worksheet.update_cell(row_index, 3, timestamp)
                 return (
                     True,
                     f"✅ تم تسجيل خروجكِ بنجاح، {user_name}. نأمل أن يكون يومكِ مليئاً بالإنجازات. 💙",
                 )
             else:
-                return False, "خطأ في العثور على سجل الدخول"
+                return False, f"❌{user_name}لم تقومي بتسجيل الدخول اليوم."
 
         except Exception as e:
             logger.error(f"Error recording checkout for {user_id}: {e}")
@@ -265,6 +267,7 @@ class UserManager:
         """Check if chat_id is already registered"""
         try:
             _, values = self.sheets_manager.get_telegram_chat_ids_sheet()
+            print(any(row[0] == chat_id for row in values))
             return any(row[0] == chat_id for row in values)
         except Exception as e:
             logger.error(f"Error checking chat ID registration {chat_id}: {e}")

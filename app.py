@@ -36,7 +36,7 @@ logger = logging.getLogger(__name__)
 class Config:
     """Configuration class for the bot"""
 
-    SERVICE_ACCOUNT_FILE = "peerless-aria-466111-h6-4e3335ac9779.json"
+    SERVICE_ACCOUNT_FILE = "peerless-aria-466111-h6-b8c14ab44514.json"
     SCOPES = [
         "https://www.googleapis.com/auth/spreadsheets",
         "https://www.googleapis.com/auth/drive",

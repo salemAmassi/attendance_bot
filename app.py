@@ -42,7 +42,7 @@ class Config:
         "https://www.googleapis.com/auth/drive",
     ]
     TELEGRAM_TOKEN = os.getenv("BOT_TOKEN")
-    TIMEZONE_OFFSET = 0  # hours
+    TIMEZONE_OFFSET = 3  # hours
 
     # Spreadsheet names
     PARTICIPANTS_SPREADSHEET = "participants application | Rewaq"
